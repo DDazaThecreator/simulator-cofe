@@ -44,6 +44,8 @@ st.markdown(f"""
 ### 📅 Día {st.session_state.dia}
 **Precio actual del café:** ${st.session_state.precio:,.2f}
 """)
+st.info(f"📰 Noticia del día: {st.session_state.noticia_actual}")
+
 
 # ---------------- CAPITAL EDITABLE ----------------
 capital_input = st.number_input(
