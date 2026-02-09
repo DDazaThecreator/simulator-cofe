@@ -2,6 +2,15 @@ import streamlit as st
 import pandas as pd
 import random
 
+noticias = {
+    "☀️ Buen clima en zonas cafeteras": 0.04,
+    "❄️ Heladas afectan la cosecha": -0.05,
+    "📈 Aumento de la demanda internacional": 0.06,
+    "📉 Caída del consumo mundial": -0.04,
+    "🚢 Problemas en exportaciones": -0.03,
+    "🏭 Mayor inversión en producción": 0.03
+}
+
 st.set_page_config(page_title="Simulador de Inversión en Café", layout="centered")
 
 st.title("☕ Cofe Trade Pro")
