@@ -16,6 +16,9 @@ st.set_page_config(page_title="Simulador de Inversión en Café", layout="center
 st.title("☕ Cofe Trade Pro")
 
 # ---------------- ESTADO INICIAL ----------------
+if "noticia_actual" not in st.session_state:
+    st.session_state.noticia_actual = "Sin noticias hoy"
+
 if "dia" not in st.session_state:
     st.session_state.dia = 1
 
@@ -102,6 +105,18 @@ with col2:
             st.error("No tienes suficientes acciones")
 
 # ---------------- AVANZAR DÍA ----------------
+if st.button("⏭ Avanzar día"):
+    noticia, impacto = random.choice(list(noticias.items()))
+
+    cambio_base = random.uniform(-0.02, 0.02)
+    cambio_total = cambio_base + impacto
+
+    st.session_state.precio *= (1 + cambio_total)
+    st.session_state.dia += 1
+    st.session_state.precios.append(st.session_state.precio)
+
+    st.session_state.noticia_actual = noticia
+
 if st.button("⏭ Avanzar día"):
     cambio = random.uniform(-0.05, 0.05)
     st.session_state.precio *= (1 + cambio)
