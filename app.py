@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Simulador Café", layout="centered")
 
-st.title("☕ Simulador de Inversión en Café")
+st.title("☕ Cofe Trade Pro")
 
 # ===== ESTADO INICIAL =====
 if "capital" not in st.session_state:
