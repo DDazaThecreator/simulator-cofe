@@ -7,103 +7,93 @@ Original file is located at
     https://colab.research.google.com/drive/1Yy1rmNdEifw1T5Q-JFPzkEXJFMGfBOcJ
 """
 
+import streamlit as st
 import random
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# ===== CONFIGURACIÓN INICIAL =====
-capital_inicial = float(input("💰 Ingresa tu capital inicial: "))
-capital = capital_inicial
-acciones = 0
-precio_cafe = 10000
-dia = 1
+st.set_page_config(page_title="Simulador Café", layout="centered")
 
-historial_precios = []
-movimientos = []
+st.title("☕ Simulador de Inversión en Café")
 
-noticias = [
-    "🌧️ Lluvias afectan la cosecha",
-    "☀️ Buen clima impulsa la producción",
-    "📦 Aumento de exportaciones",
-    "📉 Caída de la demanda internacional",
-    "📈 Alta demanda en Europa",
-    "🚢 Problemas logísticos en puertos"
-]
+# ===== ESTADO INICIAL =====
+if "capital" not in st.session_state:
+    st.session_state.capital = 0.0
+    st.session_state.acciones = 0
+    st.session_state.precio = 10000.0
+    st.session_state.dia = 1
+    st.session_state.historial = []
+    st.session_state.movimientos = []
 
-print("\n☕ Simulador de Inversión en Café ☕")
+# ===== CAPITAL INICIAL =====
+if st.session_state.capital == 0:
+    capital_inicial = st.number_input(
+        "💰 Ingresa tu capital inicial",
+        min_value=0.0,
+        step=100000.0
+    )
+    if st.button("Iniciar simulación"):
+        st.session_state.capital = capital_inicial
+        st.rerun()
 
-while True:
-    print(f"\n📅 Día {dia}")
-    print(f"Precio del café: ${precio_cafe:.2f}")
-    print(f"Capital disponible: ${capital:.2f}")
-    print(f"Acciones en posesión: {acciones}")
+else:
+    st.subheader(f"📅 Día {st.session_state.dia}")
+    st.metric("Precio del café", f"${st.session_state.precio:,.2f}")
+    st.metric("Capital disponible", f"${st.session_state.capital:,.2f}")
+    st.metric("Acciones", st.session_state.acciones)
 
-    print("\nOpciones:")
-    print("1. Comprar acciones")
-    print("2. Vender acciones")
-    print("3. Avanzar día")
-    print("4. Finalizar simulación")
+    col1, col2 = st.columns(2)
 
-    opcion = input("Selecciona una opción: ")
+    # ===== COMPRAR =====
+    with col1:
+        cantidad_compra = st.number_input("Comprar acciones", min_value=0, step=1)
+        if st.button("📥 Comprar"):
+            costo = cantidad_compra * st.session_state.precio
+            if costo <= st.session_state.capital:
+                st.session_state.capital -= costo
+                st.session_state.acciones += cantidad_compra
+                st.session_state.movimientos.append(
+                    [st.session_state.dia, "Compra", cantidad_compra, st.session_state.precio]
+                )
+                st.success("Compra realizada")
+            else:
+                st.error("Capital insuficiente")
 
-    if opcion == "1":
-        cantidad = int(input("Cantidad de acciones a comprar: "))
-        costo = cantidad * precio_cafe
-        if costo <= capital:
-            capital -= costo
-            acciones += cantidad
-            movimientos.append([dia, "Compra", cantidad, precio_cafe, capital])
-            print("✅ Compra exitosa")
-        else:
-            print("❌ Capital insuficiente")
+    # ===== VENDER =====
+    with col2:
+        cantidad_venta = st.number_input("Vender acciones", min_value=0, step=1)
+        if st.button("📤 Vender"):
+            if cantidad_venta <= st.session_state.acciones:
+                st.session_state.capital += cantidad_venta * st.session_state.precio
+                st.session_state.acciones -= cantidad_venta
+                st.session_state.movimientos.append(
+                    [st.session_state.dia, "Venta", cantidad_venta, st.session_state.precio]
+                )
+                st.success("Venta realizada")
+            else:
+                st.error("No tienes suficientes acciones")
 
-    elif opcion == "2":
-        cantidad = int(input("Cantidad de acciones a vender: "))
-        if cantidad <= acciones:
-            capital += cantidad * precio_cafe
-            acciones -= cantidad
-            movimientos.append([dia, "Venta", cantidad, precio_cafe, capital])
-            print("✅ Venta exitosa")
-        else:
-            print("❌ No tienes suficientes acciones")
-
-    elif opcion == "3":
-        noticia = random.choice(noticias)
+    # ===== AVANZAR DÍA =====
+    if st.button("⏭️ Avanzar día"):
         cambio = random.uniform(-0.06, 0.06)
-        precio_cafe += precio_cafe * cambio
+        st.session_state.precio += st.session_state.precio * cambio
+        st.session_state.historial.append(st.session_state.precio)
+        st.session_state.dia += 1
 
-        historial_precios.append(precio_cafe)
-        movimientos.append([dia, "Mercado", "-", precio_cafe, capital])
-
-        print("\n📰 Noticia del día:", noticia)
-        dia += 1
-
-    elif opcion == "4":
-        valor_final = capital + acciones * precio_cafe
-
-        print("\n📊 RESULTADOS FINALES")
-        print(f"Capital inicial: ${capital_inicial:.2f}")
-        print(f"Capital final: ${valor_final:.2f}")
-        print(f"Ganancia/Pérdida: ${valor_final - capital_inicial:.2f}")
-
-        # ===== TABLA =====
+    # ===== TABLA =====
+    if st.session_state.movimientos:
+        st.subheader("📋 Movimientos")
         df = pd.DataFrame(
-            movimientos,
-            columns=["Día", "Acción", "Cantidad", "Precio", "Capital restante"]
+            st.session_state.movimientos,
+            columns=["Día", "Tipo", "Cantidad", "Precio"]
         )
-        display(df)
+        st.dataframe(df)
 
-        # ===== GRÁFICA =====
-        plt.figure(figsize=(8,4))
-        plt.plot(historial_precios, marker='o')
-        plt.title("Evolución del precio del café")
-        plt.xlabel("Días")
-        plt.ylabel("Precio")
-        plt.grid(True)
-        plt.show()
-
-        print("☕ Fin del simulador")
-        break
-
-    else:
-        print("❌ Opción inválida")
+    # ===== GRÁFICA =====
+    if st.session_state.historial:
+        st.subheader("📈 Precio del café")
+        fig, ax = plt.subplots()
+        ax.plot(st.session_state.historial, marker="o")
+        ax.set_xlabel("Días")
+        ax.set_ylabel("Precio")
+        st.pyplot(fig)
