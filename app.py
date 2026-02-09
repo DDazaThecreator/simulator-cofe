@@ -117,12 +117,6 @@ if st.button("⏭ Avanzar día"):
 
     st.session_state.noticia_actual = noticia
 
-if st.button("⏭ Avanzar día"):
-    cambio = random.uniform(-0.05, 0.05)
-    st.session_state.precio *= (1 + cambio)
-    st.session_state.dia += 1
-    st.session_state.precios.append(st.session_state.precio)
-
 # ---------------- GRÁFICA ----------------
 st.subheader("📊 Precio del café en el tiempo")
 st.line_chart(st.session_state.precios)
