@@ -13,7 +13,7 @@ noticias = {
 
 st.set_page_config(page_title="Simulador de Inversión en Café", layout="centered")
 
-st.title("☕ Cofe Trade Pro")
+st.title("☕ CoFFEe Trade Pro")
 
 # ---------------- ESTADO INICIAL ----------------
 if "noticia_actual" not in st.session_state:
